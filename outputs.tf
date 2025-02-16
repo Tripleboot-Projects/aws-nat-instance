@@ -40,5 +40,5 @@ output "nat_instance_subnet_id" {
 
 output "routes_ids" {
   description = "The route tables for the nat instance to be associated with"
-  value       = aws_route.nat_route[*].id
+  value       = aws_route.nat_route[*].route_table_id
 }
