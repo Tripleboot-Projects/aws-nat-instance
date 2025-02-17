@@ -33,7 +33,7 @@ resource "aws_security_group_rule" "all_egress" {
 }
 
 resource "aws_iam_role" "nat_role" {
-  count = var.iam_instance_profile != null ? 1 : 0
+  count = var.iam_instance_profile == null ? 1 : 0
   name  = "${var.resource_names}-instance-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -49,12 +49,12 @@ resource "aws_iam_role" "nat_role" {
   })
 }
 resource "aws_iam_instance_profile" "nat_instance_profile" {
-  count = var.iam_instance_profile != null ? 1 : 0
+  count = var.iam_instance_profile == null ? 1 : 0
   name  = "${var.resource_names}-nat-instance-profile"
   role  = aws_iam_role.nat_role[0].name
 }
 resource "aws_iam_role_policy_attachment" "nat_policy_attachment" {
-  count      = var.iam_instance_profile != null ? 1 : 0
+  count      = var.iam_instance_profile == null ? 1 : 0
   role       = aws_iam_role.nat_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
@@ -66,7 +66,7 @@ resource "aws_instance" "nat_instance" {
   associate_public_ip_address = true
   source_dest_check           = false
   security_groups             = [aws_security_group.nat_sg.id]
-  iam_instance_profile        = var.iam_instance_profile != null ? aws_iam_instance_profile.nat_instance_profile[0].name : null
+  iam_instance_profile        = var.iam_instance_profile == null ? aws_iam_instance_profile.nat_instance_profile[0].name : var.iam_instance_profile
   metadata_options {
     http_endpoint               = "enabled"
     http_put_response_hop_limit = "1"
